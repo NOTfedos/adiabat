@@ -23,8 +23,7 @@ const unsigned int A = 1, B = 1, C = 1;
 const unsigned int COUNT_LIMIT = pow(10, 2);
 const mpf_class T = pow(1.0, -3);
 const mpf_class dt = pow(2.0, -5);
-//const mpf_class v_c = pow(10.0, -2) / dt;
-const mpf_class v_c = 0.0;
+const mpf_class v_c = pow(10.0, -2) / dt;
 const double M = pow(10, -10);
 
 
@@ -155,7 +154,7 @@ int main(){
         pressure = 0.0;
 
         // проводим серию измерений давления
-        for (int t = 0; t < 15; t++){
+        for (int t = 0; t < 10; t++){
             collides = 0.0;
             for (unsigned long i=0; i < N; i++){
                 arr[i].move();
@@ -163,11 +162,11 @@ int main(){
             }
             pressure += collides / box.get_square();
         }
-        pressure = pressure / 15;  // нормируем давление
+        pressure = pressure / 10;  // нормируем давление
 
         outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
         // отладочный вывод
-        cout << "Progress " << counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
+        cout << "Progress " << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
         //cout << pressure << " " << box.get_volume() << endl;
 
         box.c += dt * v_c;
