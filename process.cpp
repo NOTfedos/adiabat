@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 #include <vector>
@@ -14,13 +15,16 @@ using std::cout;
 using std::ofstream;
 using std::endl;
 using std::string;
+using std::setprecision;
 
 
 const unsigned long N = pow(10, 6);
 const unsigned int A = 1, B = 1, C = 1;
 const unsigned int COUNT_LIMIT = pow(10, 2);
-const mpf_class dt = pow(10.0, -4);
-const mpf_class v_c = pow(10.0, -3);
+const mpf_class T = pow(1.0, -3);
+const mpf_class dt = pow(2.0, -5);
+//const mpf_class v_c = pow(10.0, -2) / dt;
+const mpf_class v_c = 0.0;
 const double M = pow(10, -10);
 
 
@@ -29,24 +33,24 @@ string output_filename = "data.txt";
 
 class Body{
 public:
-    mpf_class x, y, z, px, py, pz;
+    mpf_class x, y, z, vx, vy, vz;
 
     Body(){};
 
     Body(const double& a, const double& b, const double& c){
-        x = rand() / RAND_MAX * a;
-        y = rand() / RAND_MAX * b;
-        z = rand() / RAND_MAX * c;
-        px = rand();
-        py = rand();
-        pz = rand();  // распределение может быть не Максвелловским
+        x = a * (double) rand() / RAND_MAX;
+        y = b * (double) rand() / RAND_MAX;
+        z = c * (double) rand() / RAND_MAX;
+        vx = (double) rand() / RAND_MAX;
+        vy = (double) rand() / RAND_MAX;
+        vy = (double) rand() / RAND_MAX;  // распределение может быть не Максвелловским
     }
 
     // обновление координат
     void move(){
-        this->x += px / M * dt;
-        this->y += py / M * dt;
-        this->z += pz / M * dt;
+        this->x += vx * dt;
+        this->y += vy * dt;
+        this->z += vz * dt;
     }
 };
 
@@ -72,16 +76,16 @@ public:
     mpf_class collide(Body& molecula) const{
         mpf_class is_collide = 0;
         if ((molecula.x < 0) || (molecula.x > a)){
-            molecula.px = -1 * molecula.px;
-            is_collide += 2 * abs(molecula.px) / dt;
+            molecula.vx = -1 * molecula.vx;
+            is_collide += 2 * abs(molecula.vx) * M / dt;
         }
         if ((molecula.y < 0) || (molecula.y > b)){
-            molecula.py = -1 * molecula.py;
-            is_collide = 2 * abs(molecula.py) / dt;
+            molecula.vy = -1 * molecula.vy;
+            is_collide = 2 * abs(molecula.vy) * M / dt;
         }
         if ((molecula.z < 0) || (molecula.z > c)){
-            molecula.pz = -1 * molecula.pz;
-            is_collide = 2 * abs(molecula.pz) / dt;
+            molecula.vz = -1 * molecula.vz;
+            is_collide = 2 * abs(molecula.vz) * M / dt;
         }
         return is_collide;
     }
@@ -112,7 +116,7 @@ public:
         return this->get_at(i);
     }
 
-    void size() const{
+    unsigned int size() const{
         return this->self_size;
     }
 
@@ -142,19 +146,30 @@ int main(){
     MyVector<Body> arr = spawn_molecules();//
 
     long int counter = 0;
+    mpf_class collides = 0;  // изменение импульса
+    mpf_class pressure = 0;  // давление
+
+
     while(counter < COUNT_LIMIT){
-        mpf_class collides = 0;
-        for (unsigned long i=0; i < N; i++){
-            arr[i].move();
-            collides += box.collide( arr[i] );
+
+        pressure = 0.0;
+
+        // проводим серию измерений давления
+        for (int t = 0; t < 15; t++){
+            collides = 0.0;
+            for (unsigned long i=0; i < N; i++){
+                arr[i].move();
+                collides += box.collide( arr[i] );
+            }
+            pressure += collides / box.get_square();
         }
+        pressure = pressure / 15;  // нормируем давление
 
         outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
-
         // отладочный вывод
-        if (counter % (COUNT_LIMIT / 30) == 0){
-            cout << collides / box.get_square() << " " << box.get_volume() << endl;
-        }
+        cout << "Progress " << counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
+        //cout << pressure << " " << box.get_volume() << endl;
+
         box.c += dt * v_c;
         counter++;
     }
