@@ -19,11 +19,11 @@ using std::setprecision;
 using std::fixed;
 
 
-const unsigned long N = pow(10, 5);  // количество молекул
+const unsigned long N = pow(10, 4);  // количество молекул
 const unsigned int A = 2, B = 2, C = 1;  // габариты параллелепипеда
 const unsigned int COUNT_LIMIT = pow(10, 2);  // количество итераций процесса
 const mpf_class dt = pow(2.0, -6);
-const mpf_class v_c = pow(10.0, -2) / dt;  // скорость расширения сосуда
+const mpf_class v_c = pow(10.0, -1) / dt;  // скорость расширения сосуда
 const double M = pow(10, -10);
 
 
@@ -155,19 +155,22 @@ int main(){
         pressure = 0.0;
 
         // проводим серию измерений давления
-        for (int t = 0; t < 20; t++){
+        for (int t = 0; t < 100; t++){
             force = 0.0;
             for (unsigned long i=0; i < N; i++){
                 arr[i].move();
                 force += box.collide( arr[i] );
             }
 
-            outf << force / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+            pressure += force;
+
+            //outf << force / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
         }
 
+        outf << pressure / 100 / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
 
         // отладочный вывод
-        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(0) << "%" << endl;
+        cout << "\e[A\r\e[0K" << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%";
         //cout << pressure << " " << box.get_volume() << endl;
 
         box.c += dt * v_c;
