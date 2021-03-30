@@ -5,8 +5,6 @@
 #include <vector>
 #include <ctime>
 
-#include <gmpxx.h>
-
 
 using std::vector;
 using std::rand;
@@ -19,12 +17,13 @@ using std::setprecision;
 using std::fixed;
 
 
-const unsigned long N = pow(10, 5);  // количество молекул
-const unsigned int A = 2, B = 2, C = 1;  // габариты параллелепипеда
-const unsigned int COUNT_LIMIT = pow(10, 2);  // количество итераций процесса
-const mpf_class dt = pow(2.0, -6);
-const mpf_class v_c = pow(10.0, -2) / dt;  // скорость расширения сосуда
+const unsigned long N = pow(10, 6);
+const unsigned int A = 2, B = 2, C = 1;
+const unsigned int COUNT_LIMIT = pow(10, 2);
+const double dt = pow(2.0, -5);
+const double v_c = -pow(10.0, -2) / dt;
 const double M = pow(10, -10);
+const double Av = 1000;
 
 
 string output_filename = "data.txt";
@@ -32,7 +31,7 @@ string output_filename = "data.txt";
 
 class Body{
 public:
-    mpf_class x, y, z, vx, vy, vz;
+    double x, y, z, vx, vy, vz;
 
     Body(){};
 
@@ -40,9 +39,9 @@ public:
         x = a * (double) rand() / RAND_MAX;
         y = b * (double) rand() / RAND_MAX;
         z = c * (double) rand() / RAND_MAX;
-        vx = (double) rand() / RAND_MAX;
-        vy = (double) rand() / RAND_MAX;
-        vy = (double) rand() / RAND_MAX;  // распределение может быть не Максвелловским
+        vx = (double) rand() / RAND_MAX * Av;
+        vy = (double) rand() / RAND_MAX * Av;
+        vy = (double) rand() / RAND_MAX * Av;  // распределение может быть не Максвелловским
     }
 
     // обновление координат
@@ -56,7 +55,7 @@ public:
 class BoxContainer{
 // параллелограм в начале координат
 public:
-    mpf_class a, b, c;
+    double a, b, c;
 
     BoxContainer(double a, double b, double c){
         this->a = a;  // по X координате
@@ -64,16 +63,16 @@ public:
         this->c = c;  // по Z координате
     }
 
-    mpf_class get_volume() const{
+    double get_volume() const{
         return a * b * c;
     }
 
-    mpf_class get_square() const{
+    double get_square() const{
         return 2*(a*b + b*c + a*c);
     }
 
-    mpf_class collide(Body& molecula) const{
-        mpf_class is_collide = 0;
+    double collide(Body& molecula) const{
+        double is_collide = 0;
         if ((molecula.x < 0) || (molecula.x > a)){
             molecula.vx = -1 * molecula.vx;
             is_collide += 2 * abs(molecula.vx) * M / dt;
@@ -146,8 +145,8 @@ int main(){
     MyVector<Body> arr = spawn_molecules();//
 
     long int counter = 0;
-    mpf_class collides = 0;  // изменение импульса
-    mpf_class pressure = 0;  // давление
+    double collides = 0.0;  // изменение импульса
+    double pressure = 0.0;  // давление
 
 
     while(counter < COUNT_LIMIT){
@@ -161,26 +160,22 @@ int main(){
                 arr[i].move();
                 collides += box.collide( arr[i] );
             }
-            outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
-            //pressure += collides / box.get_square();
+            pressure += collides / box.get_square();
         }
-        //pressure = pressure / 15;  // нормируем давление
+        pressure = pressure / 15;  // нормируем давление
 
-        //outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+        outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
 
         // отладочный вывод
-        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(0) << "%" << endl;
+        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
         //cout << pressure << " " << box.get_volume() << endl;
 
         box.c += dt * v_c;
         counter++;
     }
 
-    
     long int end = clock();
-    cout << "Calc ended in " << (end - start) / CLOCKS_PER_SEC / 60 << " minutes" << endl;
-    cout << "Output written into " << output_filename << endl;
-
+    cout << "Calc ended in " << (end - start) / CLOCKS_PER_SEC << endl;
 
     outf.close();
 

@@ -1,5 +1,5 @@
-g++ process.cpp -lgmpxx -lgmp -o proc.exe
+g++ process.cpp -lgmpxx -lgmp -o prockek.exe
 pause
-proc.exe
+prockek.exe
 pause
 cls

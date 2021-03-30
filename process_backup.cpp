@@ -19,11 +19,11 @@ using std::setprecision;
 using std::fixed;
 
 
-const unsigned long N = pow(10, 5);  // количество молекул
-const unsigned int A = 2, B = 2, C = 1;  // габариты параллелепипеда
-const unsigned int COUNT_LIMIT = pow(10, 2);  // количество итераций процесса
-const mpf_class dt = pow(2.0, -6);
-const mpf_class v_c = pow(10.0, -2) / dt;  // скорость расширения сосуда
+const unsigned long N = pow(10, 6);
+const unsigned int A = 1, B = 1, C = 1;
+const unsigned int COUNT_LIMIT = pow(10, 2);
+const mpf_class dt = pow(2.0, -5);
+const mpf_class v_c = pow(10.0, -2) / dt;
 const double M = pow(10, -10);
 
 
@@ -161,26 +161,22 @@ int main(){
                 arr[i].move();
                 collides += box.collide( arr[i] );
             }
-            outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
-            //pressure += collides / box.get_square();
+            pressure += collides / box.get_square();
         }
-        //pressure = pressure / 15;  // нормируем давление
+        pressure = pressure / 15;  // нормируем давление
 
-        //outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+        outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
 
         // отладочный вывод
-        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(0) << "%" << endl;
+        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
         //cout << pressure << " " << box.get_volume() << endl;
 
         box.c += dt * v_c;
         counter++;
     }
 
-    
     long int end = clock();
-    cout << "Calc ended in " << (end - start) / CLOCKS_PER_SEC / 60 << " minutes" << endl;
-    cout << "Output written into " << output_filename << endl;
-
+    cout << "Calc ended in " << (end - start) / CLOCKS_PER_SEC << endl;
 
     outf.close();
 
