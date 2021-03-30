@@ -40,9 +40,9 @@ public:
         x = a * (double) rand() / RAND_MAX;
         y = b * (double) rand() / RAND_MAX;
         z = c * (double) rand() / RAND_MAX;
-        vx = (double) rand() / RAND_MAX;
-        vy = (double) rand() / RAND_MAX;
-        vy = (double) rand() / RAND_MAX;  // распределение может быть не Максвелловским
+        vx = (double) (1 - 2 * rand() / RAND_MAX);
+        vy = (double) (1 - 2 * rand() / RAND_MAX);
+        vy = (double) (1 - 2 * rand() / RAND_MAX);  // распределение может быть не Максвелловским (?)
     }
 
     // обновление координат
@@ -73,20 +73,20 @@ public:
     }
 
     mpf_class collide(Body& molecula) const{
-        mpf_class is_collide = 0;
+        mpf_class force = 0;
         if ((molecula.x < 0) || (molecula.x > a)){
             molecula.vx = -1 * molecula.vx;
-            is_collide += 2 * abs(molecula.vx) * M / dt;
+            force += 2 * abs(molecula.vx) * M / dt;
         }
         if ((molecula.y < 0) || (molecula.y > b)){
             molecula.vy = -1 * molecula.vy;
-            is_collide = 2 * abs(molecula.vy) * M / dt;
+            force = 2 * abs(molecula.vy) * M / dt;
         }
         if ((molecula.z < 0) || (molecula.z > c)){
             molecula.vz = -1 * molecula.vz;
-            is_collide = 2 * abs(molecula.vz) * M / dt;
+            force = 2 * abs(molecula.vz) * M / dt;
         }
-        return is_collide;
+        return force;
     }
 
 };
@@ -146,7 +146,7 @@ int main(){
     MyVector<Body> arr = spawn_molecules();//
 
     long int counter = 0;
-    mpf_class collides = 0;  // изменение импульса
+    mpf_class force = 0;  // изменение импульса
     mpf_class pressure = 0;  // давление
 
 
@@ -155,18 +155,16 @@ int main(){
         pressure = 0.0;
 
         // проводим серию измерений давления
-        for (int t = 0; t < 15; t++){
-            collides = 0.0;
+        for (int t = 0; t < 20; t++){
+            force = 0.0;
             for (unsigned long i=0; i < N; i++){
                 arr[i].move();
-                collides += box.collide( arr[i] );
+                force += box.collide( arr[i] );
             }
-            outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
-            //pressure += collides / box.get_square();
-        }
-        //pressure = pressure / 15;  // нормируем давление
 
-        //outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+            outf << force / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+        }
+
 
         // отладочный вывод
         cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(0) << "%" << endl;

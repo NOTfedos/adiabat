@@ -7,9 +7,9 @@ y_arr = []
 
 for line in open("data.txt", "r"):
     p, v = list(map(float, line.split(" ")))
-    
-    x_arr.append(v)
-    y_arr.append(p)
+    if (p != 0) and (v != 0):
+        x_arr.append(v)
+        y_arr.append(p)
 
 #---------------------------/ Graphics /--------------------------
 
@@ -41,7 +41,7 @@ ax.errorbar(x_arr, y_arr, fmt='s')
 #---------------------------/ МНК /--------------------------------
 
 def f(x, a):
-    return a*pow(x, -5/3)
+    return a*pow(x, -1)
 
 z = curve_fit(f, x_arr, y_arr)
 print(z[0][0])
