@@ -16,12 +16,12 @@ using std::ofstream;
 using std::endl;
 using std::string;
 using std::setprecision;
+using std::fixed;
 
 
-const unsigned long N = pow(10, 6);
-const unsigned int A = 1, B = 1, C = 1;
+const unsigned long N = pow(10, 7);
+const unsigned int A = 2, B = 2, C = 1;
 const unsigned int COUNT_LIMIT = pow(10, 2);
-const mpf_class T = pow(1.0, -3);
 const mpf_class dt = pow(2.0, -5);
 const mpf_class v_c = pow(10.0, -2) / dt;
 const double M = pow(10, -10);
@@ -137,6 +137,7 @@ MyVector<Body> spawn_molecules(){
 int main(){
 
     long int start = clock();
+    srand(clock());
 
     ofstream outf;
     outf.open(output_filename);
@@ -154,7 +155,7 @@ int main(){
         pressure = 0.0;
 
         // проводим серию измерений давления
-        for (int t = 0; t < 10; t++){
+        for (int t = 0; t < 15; t++){
             collides = 0.0;
             for (unsigned long i=0; i < N; i++){
                 arr[i].move();
@@ -162,11 +163,12 @@ int main(){
             }
             pressure += collides / box.get_square();
         }
-        pressure = pressure / 10;  // нормируем давление
+        pressure = pressure / 15;  // нормируем давление
 
         outf << collides / box.get_square() << " " <<  box.get_volume() << endl;  // вывод данных
+
         // отладочный вывод
-        cout << "Progress " << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
+        cout << "Progress " << fixed << (double) counter / COUNT_LIMIT * 100 << setprecision(1) << "%" << endl;
         //cout << pressure << " " << box.get_volume() << endl;
 
         box.c += dt * v_c;
